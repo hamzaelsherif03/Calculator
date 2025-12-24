@@ -464,101 +464,153 @@ export default function App() {
           </button>
         </div>
 
-        {/* Price Status Banner */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 mb-6 text-white">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <div className="text-sm opacity-90">Grid Started At</div>
-              <div className="text-3xl font-bold">${gridStartPrice.toLocaleString()}</div>
-            </div>
-            <div>
-              <div className="text-sm opacity-90">Current Price</div>
-              <div className="text-3xl font-bold">${currentPrice.toLocaleString()}</div>
-            </div>
-            <div>
-              <div className="text-sm opacity-90">Price Movement</div>
-              <div className="text-3xl font-bold">{priceDropped ? '-' : '+'}${priceChange.toLocaleString()}</div>
-              <div className="text-sm opacity-90">{priceDropped ? '↓' : '↑'} {priceChangePercent}%</div>
-            </div>
-          </div>
-        </div>
+        {/* Hero Section - Price & Position Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-        {/* Input Panel */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-slate-800">Strategy Parameters</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Grid Start Price (USD)</div>
-              <input type="number" value={gridStartPrice} onChange={e => setGridStartPrice(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none font-semibold" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Current Market Price (USD)</div>
-              <input type="number" value={currentPrice} onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none font-semibold" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Grid Step (USD)</div>
-              <input type="number" value={step} onChange={e => setStep(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Lot Size per Order</div>
-              <input type="number" step="0.01" value={lotSize} onChange={e => setLotSize(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Number of Levels</div>
-              <input type="number" value={levels} onChange={e => setLevels(parseInt(e.target.value) || 0)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Take Profit (USD/oz)</div>
-              <input type="number" value={tp} onChange={e => setTp(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Balance (USC)</div>
-              <input type="number" value={balanceUSC} onChange={e => setBalanceUSC(parseFloat(e.target.value) || 0)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-            <label className="space-y-2">
-              <div className="text-sm font-medium text-slate-700">Leverage</div>
-              <input type="number" value={leverage} onChange={e => setLeverage(parseFloat(e.target.value) || 1)} className="w-full p-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-            </label>
-          </div>
-        </div>
+          {/* Left Hero - Price Status (Blue) */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
 
-        {/* Position Status */}
-        {analysis && !analysis.noPositions && (
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 mb-6 text-white">
-            <div className="flex items-center gap-3 mb-3">
-              <Activity className="w-8 h-8" />
-              <h3 className="text-2xl font-bold">Active Positions Status</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <div className="text-sm opacity-90">Triggered Levels</div>
-                <div className="text-3xl font-bold">{analysis.numTriggered} / {levels}</div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <DollarSign className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-bold">Price Status</h2>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Current Equity</div>
-                <div className="text-3xl font-bold">{analysis.currentEquity?.toLocaleString() ?? '0'}</div>
-              </div>
-              <div>
-                <div className="text-sm opacity-90">Floating P/L</div>
-                <div className={`text-3xl font-bold ${(analysis.currentFloatingPL ?? 0) >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                  {(analysis.currentFloatingPL ?? 0) >= 0 ? '+' : ''}{(analysis.currentFloatingPL ?? 0).toLocaleString()}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Grid Started At</div>
+                  <div className="text-4xl font-bold tracking-tight">${gridStartPrice.toLocaleString()}</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Current Price</div>
+                  <div className="text-4xl font-bold tracking-tight">${currentPrice.toLocaleString()}</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Price Movement</div>
+                  <div className={`text-4xl font-bold tracking-tight ${priceDropped ? 'text-red-300' : 'text-green-300'}`}>
+                    {priceDropped ? '-' : '+'}${priceChange.toLocaleString()}
+                  </div>
+                  <div className="text-sm font-medium opacity-80 mt-1 flex items-center gap-1">
+                    <span className={`text-lg ${priceDropped ? 'text-red-300' : 'text-green-300'}`}>
+                      {priceDropped ? '↓' : '↑'}
+                    </span>
+                    {priceChangePercent}%
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Avg Entry Price</div>
-                <div className="text-3xl font-bold">${analysis.avgEntryFixed?.toLocaleString() ?? '0'}</div>
+            </div>
+          </div>
+
+          {/* Right Side - Strategy Parameters (Compact) */}
+          <div className="bg-white rounded-2xl shadow-xl p-5 border border-slate-200">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <span className="p-2 bg-slate-100 rounded-lg">
+                <Target className="w-5 h-5 text-slate-600" />
+              </span>
+              Strategy Parameters
+            </h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Start Price</div>
+                  <input type="number" value={gridStartPrice} onChange={e => setGridStartPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50" />
+                </label>
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Current Price</div>
+                  <input type="number" value={currentPrice} onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50" />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Grid Step</div>
+                  <input type="number" value={step} onChange={e => setStep(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Lot Size</div>
+                  <input type="number" step="0.01" value={lotSize} onChange={e => setLotSize(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Levels</div>
+                  <input type="number" value={levels} onChange={e => setLevels(parseInt(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Take Profit</div>
+                  <input type="number" value={tp} onChange={e => setTp(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Balance (USC)</div>
+                  <input type="number" value={balanceUSC} onChange={e => setBalanceUSC(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600">Leverage</div>
+                  <input type="number" value={leverage} onChange={e => setLeverage(parseFloat(e.target.value) || 1)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Position Status Hero (Purple) */}
+        {analysis && !analysis.noPositions && (
+          <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-fuchsia-700 rounded-2xl shadow-2xl p-8 mb-6 text-white relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2"></div>
+            <div className="absolute bottom-0 right-0 w-56 h-56 bg-white/5 rounded-full translate-y-1/2 translate-x-1/4"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Activity className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold">Active Positions Status</h3>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Triggered Levels</div>
+                  <div className="text-4xl font-bold tracking-tight">{analysis.numTriggered} <span className="text-2xl opacity-70">/ {levels}</span></div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Current Equity</div>
+                  <div className="text-4xl font-bold tracking-tight">{analysis.currentEquity?.toLocaleString() ?? '0'}</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Floating P/L</div>
+                  <div className={`text-4xl font-bold tracking-tight ${(analysis.currentFloatingPL ?? 0) >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                    {(analysis.currentFloatingPL ?? 0) >= 0 ? '+' : ''}{(analysis.currentFloatingPL ?? 0).toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <div className="text-sm font-medium opacity-80 mb-2">Avg Entry Price</div>
+                  <div className="text-4xl font-bold tracking-tight">${analysis.avgEntryFixed?.toLocaleString() ?? '0'}</div>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {analysis && analysis.noPositions && (
-          <div className="bg-blue-100 border-2 border-blue-300 rounded-xl p-6 mb-6">
-            <div className="flex items-center gap-3">
-              <Activity className="w-8 h-8 text-blue-700" />
+          <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-fuchsia-700 rounded-2xl shadow-2xl p-8 mb-6 text-white relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2"></div>
+            <div className="absolute bottom-0 right-0 w-56 h-56 bg-white/5 rounded-full translate-y-1/2 translate-x-1/4"></div>
+
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-4 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Activity className="w-10 h-10" />
+              </div>
               <div>
-                <h3 className="text-xl font-bold text-blue-900">No Positions Active Yet</h3>
-                <p className="text-blue-800">Current price (${currentPrice}) is still above your first grid level (${gridStartPrice.toFixed(2)}). Positions will trigger when price drops to this level.</p>
+                <h3 className="text-2xl font-bold mb-1">No Positions Active Yet</h3>
+                <p className="opacity-90">Current price (${currentPrice}) is still above your first grid level (${gridStartPrice.toFixed(2)}). Positions will trigger when price drops to this level.</p>
               </div>
             </div>
           </div>
