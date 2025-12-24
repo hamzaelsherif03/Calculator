@@ -1,17 +1,93 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { AlertTriangle, TrendingDown, DollarSign, Target, Activity, Info, X } from 'lucide-react';
 
+// Cookie utility functions
+const setCookie = (name: string, value: string, days: number = 365) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+};
+
+const getCookie = (name: string): string | null => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
 export default function App() {
-  const [gridStartPrice, setGridStartPrice] = useState(2650);
-  const [currentPrice, setCurrentPrice] = useState(2600);
-  const [step, setStep] = useState(5);
-  const [lotSize, setLotSize] = useState(0.1);
-  const [levels, setLevels] = useState(20);
-  const [tp, setTp] = useState(5);
-  const [balanceUSC, setBalanceUSC] = useState(10000);
-  const [leverage, setLeverage] = useState(2000);
+  // Load values from cookies or use defaults
+  const [gridStartPrice, setGridStartPrice] = useState(() => {
+    const saved = getCookie('gridStartPrice');
+    return saved ? parseFloat(saved) : 2650;
+  });
+  const [currentPrice, setCurrentPrice] = useState(() => {
+    const saved = getCookie('currentPrice');
+    return saved ? parseFloat(saved) : 2600;
+  });
+  const [step, setStep] = useState(() => {
+    const saved = getCookie('step');
+    return saved ? parseFloat(saved) : 5;
+  });
+  const [lotSize, setLotSize] = useState(() => {
+    const saved = getCookie('lotSize');
+    return saved ? parseFloat(saved) : 0.1;
+  });
+  const [levels, setLevels] = useState(() => {
+    const saved = getCookie('levels');
+    return saved ? parseInt(saved) : 20;
+  });
+  const [tp, setTp] = useState(() => {
+    const saved = getCookie('tp');
+    return saved ? parseFloat(saved) : 5;
+  });
+  const [balanceUSC, setBalanceUSC] = useState(() => {
+    const saved = getCookie('balanceUSC');
+    return saved ? parseFloat(saved) : 10000;
+  });
+  const [leverage, setLeverage] = useState(() => {
+    const saved = getCookie('leverage');
+    return saved ? parseFloat(saved) : 2000;
+  });
   const [contractSize] = useState(1);
   const [showModal, setShowModal] = useState(false);
+
+  // Save to cookies whenever values change
+  useEffect(() => {
+    setCookie('gridStartPrice', gridStartPrice.toString());
+  }, [gridStartPrice]);
+
+  useEffect(() => {
+    setCookie('currentPrice', currentPrice.toString());
+  }, [currentPrice]);
+
+  useEffect(() => {
+    setCookie('step', step.toString());
+  }, [step]);
+
+  useEffect(() => {
+    setCookie('lotSize', lotSize.toString());
+  }, [lotSize]);
+
+  useEffect(() => {
+    setCookie('levels', levels.toString());
+  }, [levels]);
+
+  useEffect(() => {
+    setCookie('tp', tp.toString());
+  }, [tp]);
+
+  useEffect(() => {
+    setCookie('balanceUSC', balanceUSC.toString());
+  }, [balanceUSC]);
+
+  useEffect(() => {
+    setCookie('leverage', leverage.toString());
+  }, [leverage]);
 
   const precision = 2;
 
