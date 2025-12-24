@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { AlertTriangle, TrendingDown, DollarSign, Target, Activity, Info, X } from 'lucide-react';
+import { AlertTriangle, TrendingDown, DollarSign, Target, Activity, Info, X, Moon, Sun } from 'lucide-react';
 
 // Cookie utility functions
 const setCookie = (name: string, value: string, days: number = 365) => {
@@ -55,6 +55,21 @@ export default function App() {
   });
   const [contractSize] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [showEquityCurveInfo, setShowEquityCurveInfo] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = getCookie('darkMode');
+    return saved === 'true';
+  });
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    setCookie('darkMode', darkMode.toString());
+  }, [darkMode]);
 
   // Save to cookies whenever values change
   useEffect(() => {
@@ -322,10 +337,10 @@ export default function App() {
 
   const getRiskColorClass = (color: string) => {
     const colors: Record<string, string> = {
-      green: 'bg-green-100 border-green-300 text-green-900',
-      yellow: 'bg-yellow-100 border-yellow-300 text-yellow-900',
-      orange: 'bg-orange-100 border-orange-300 text-orange-900',
-      red: 'bg-red-100 border-red-300 text-red-900'
+      green: 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-900 dark:text-green-100',
+      yellow: 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-300 dark:border-yellow-700 text-yellow-900 dark:text-yellow-100',
+      orange: 'bg-orange-100 dark:bg-orange-900/40 border-orange-300 dark:border-orange-700 text-orange-900 dark:text-orange-100',
+      red: 'bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700 text-red-900 dark:text-red-100'
     };
     return colors[color] || colors.green;
   };
@@ -354,7 +369,7 @@ export default function App() {
     const marginCallLineY = getY(marginCallEquity); // Approximate visual line
 
     return (
-      <div className="w-full h-48 bg-white rounded-lg border border-slate-200 p-2 relative overflow-hidden">
+      <div className="w-full h-48 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-2 relative overflow-hidden">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" preserveAspectRatio="none">
           {/* Grid lines */}
           <line x1={padding} y1={zeroLineY} x2={width - padding} y2={zeroLineY} stroke="#e2e8f0" strokeWidth="0.5" />
@@ -378,8 +393,8 @@ export default function App() {
             </linearGradient>
           </defs>
         </svg>
-        <div className="absolute top-2 left-2 text-xs font-bold text-slate-500">Equity Curve</div>
-        <div className="absolute bottom-2 right-2 text-xs text-slate-400">Price Drop →</div>
+        <div className="absolute top-2 left-2 text-xs font-bold text-slate-500 dark:text-slate-400">Equity Curve</div>
+        <div className="absolute bottom-2 right-2 text-xs text-slate-400 dark:text-slate-500">Price Drop →</div>
       </div>
     );
   };
@@ -391,14 +406,14 @@ export default function App() {
       <div className="space-y-1 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
         {table.map((row) => (
           <div key={row.idx} className="flex items-center gap-2 text-xs">
-            <div className="w-12 text-right font-mono text-slate-500">${row.levelPrice}</div>
-            <div className="flex-1 h-4 bg-slate-100 rounded-sm overflow-hidden relative">
+            <div className="w-12 text-right font-mono text-slate-500 dark:text-slate-400">${row.levelPrice}</div>
+            <div className="flex-1 h-4 bg-slate-100 dark:bg-slate-700 rounded-sm overflow-hidden relative">
               <div
-                className={`h-full transition-all ${row.isTriggered ? 'bg-green-500' : 'bg-slate-300'}`}
+                className={`h-full transition-all ${row.isTriggered ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-500'}`}
                 style={{ width: `${(row.lotsAtThisLevel / maxLots) * 100}%` }}
               />
             </div>
-            <div className="w-8 text-right text-slate-600">{row.lotsAtThisLevel}</div>
+            <div className="w-8 text-right text-slate-600 dark:text-slate-400">{row.lotsAtThisLevel}</div>
           </div>
         ))}
       </div>
@@ -407,32 +422,32 @@ export default function App() {
 
   const CalculationModal = ({ onClose }: { onClose: () => void }) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-xl font-bold text-slate-800">How Calculations Work</h3>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-full transition">
-            <X className="w-6 h-6 text-slate-500" />
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-transparent dark:border-slate-700">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+          <h3 className="text-xl font-bold text-slate-800 dark:text-white">How Calculations Work</h3>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition">
+            <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
           </button>
         </div>
-        <div className="p-6 space-y-4 text-slate-700">
+        <div className="p-6 space-y-4 text-slate-700 dark:text-slate-300">
           <div>
-            <h4 className="font-bold text-slate-900 mb-1">Average Entry Price</h4>
-            <p className="text-sm">Weighted average of all open positions. <br /><code className="bg-slate-100 px-1 rounded">Sum(Price * Lots) / Total Lots</code></p>
+            <h4 className="font-bold text-slate-900 dark:text-white mb-1">Average Entry Price</h4>
+            <p className="text-sm">Weighted average of all open positions. <br /><code className="bg-slate-100 dark:bg-slate-700 px-1 rounded">Sum(Price * Lots) / Total Lots</code></p>
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 mb-1">Floating P/L</h4>
-            <p className="text-sm">Profit or loss based on the difference between Current Price and Average Entry. <br /><code className="bg-slate-100 px-1 rounded">(Current Price - Avg Entry) * Total Ounces * 100</code></p>
+            <h4 className="font-bold text-slate-900 dark:text-white mb-1">Floating P/L</h4>
+            <p className="text-sm">Profit or loss based on the difference between Current Price and Average Entry. <br /><code className="bg-slate-100 dark:bg-slate-700 px-1 rounded">(Current Price - Avg Entry) * Total Ounces * 100</code></p>
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 mb-1">Margin Call Estimation</h4>
+            <h4 className="font-bold text-slate-900 dark:text-white mb-1">Margin Call Estimation</h4>
             <p className="text-sm">We use an iterative simulation (binary search) to find the exact price where your Equity drops to 50% of Used Margin. This accounts for new positions opening as price drops.</p>
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 mb-1">Equity Curve</h4>
+            <h4 className="font-bold text-slate-900 dark:text-white mb-1">Equity Curve</h4>
             <p className="text-sm">The blue line shows your projected Equity as price drops. The steepening curve illustrates how risk accelerates in a grid strategy.</p>
           </div>
         </div>
-        <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-xl">
+        <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 rounded-b-xl">
           <button onClick={onClose} className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
             Got it
           </button>
@@ -446,22 +461,31 @@ export default function App() {
   const priceChangePercent = +((priceChange / gridStartPrice) * 100).toFixed(2);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen p-4 md:p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 flex justify-between items-start">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 mb-6 flex justify-between items-start border border-transparent dark:border-slate-700">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-slate-800">XAU/USD Grid Risk Calculator</h1>
-            <p className="text-slate-600">Enter your grid start price and current price to see real-time position status and risk analysis.</p>
+            <h1 className="text-3xl font-bold mb-2 text-slate-800 dark:text-white">XAU/USD Grid Risk Calculator</h1>
+            <p className="text-slate-600 dark:text-slate-400">Enter your grid start price and current price to see real-time position status and risk analysis.</p>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-semibold hover:bg-blue-100 transition"
-          >
-            <Info className="w-5 h-5" />
-            How it works
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
+            >
+              <Info className="w-5 h-5" />
+              How it works
+            </button>
+          </div>
         </div>
 
         {/* Hero Section - Price & Position Status */}
@@ -507,52 +531,52 @@ export default function App() {
           </div>
 
           {/* Right Side - Strategy Parameters (Compact) */}
-          <div className="bg-white rounded-2xl shadow-xl p-5 border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <span className="p-2 bg-slate-100 rounded-lg">
-                <Target className="w-5 h-5 text-slate-600" />
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl dark:shadow-slate-900/50 p-5 border border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <span className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                <Target className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </span>
               Strategy Parameters
             </h3>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Start Price</div>
-                  <input type="number" value={gridStartPrice} onChange={e => setGridStartPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Start Price</div>
+                  <input type="number" value={gridStartPrice} onChange={e => setGridStartPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 dark:border-blue-800 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50 dark:bg-blue-900/30 dark:text-white" />
                 </label>
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Current Price</div>
-                  <input type="number" value={currentPrice} onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50" />
-                </label>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Grid Step</div>
-                  <input type="number" value={step} onChange={e => setStep(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                </label>
-                <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Lot Size</div>
-                  <input type="number" step="0.01" value={lotSize} onChange={e => setLotSize(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Current Price</div>
+                  <input type="number" value={currentPrice} onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 dark:border-blue-800 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50 dark:bg-blue-900/30 dark:text-white" />
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Levels</div>
-                  <input type="number" value={levels} onChange={e => setLevels(parseInt(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Grid Step</div>
+                  <input type="number" value={step} onChange={e => setStep(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
                 </label>
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Take Profit</div>
-                  <input type="number" value={tp} onChange={e => setTp(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Lot Size</div>
+                  <input type="number" step="0.01" value={lotSize} onChange={e => setLotSize(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Balance (USC)</div>
-                  <input type="number" value={balanceUSC} onChange={e => setBalanceUSC(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Levels</div>
+                  <input type="number" value={levels} onChange={e => setLevels(parseInt(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
                 </label>
                 <label className="space-y-1">
-                  <div className="text-xs font-medium text-slate-600">Leverage</div>
-                  <input type="number" value={leverage} onChange={e => setLeverage(parseFloat(e.target.value) || 1)} className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Take Profit</div>
+                  <input type="number" value={tp} onChange={e => setTp(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Balance (USC)</div>
+                  <input type="number" value={balanceUSC} onChange={e => setBalanceUSC(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
+                </label>
+                <label className="space-y-1">
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Leverage</div>
+                  <input type="number" value={leverage} onChange={e => setLeverage(parseFloat(e.target.value) || 1)} className="w-full p-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:outline-none dark:bg-slate-700 dark:text-white" />
                 </label>
               </div>
             </div>
@@ -621,96 +645,96 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
             {/* Price Levels Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-lg p-6 border-2 border-blue-200">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/30 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-3 mb-4">
-                <Target className="w-8 h-8 text-blue-700" />
-                <h3 className="text-xl font-bold text-blue-900">Critical Price Levels</h3>
+                <Target className="w-8 h-8 text-blue-700 dark:text-blue-400" />
+                <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100">Critical Price Levels</h3>
               </div>
 
               <div className="space-y-3">
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <div className="text-sm text-green-800 font-medium">Break Even Price</div>
-                  <div className="text-2xl font-bold text-green-900">${analysis.breakEvenPrice?.toLocaleString() ?? '0'}</div>
-                  <div className="text-xs text-green-700 mt-1">Avg Entry Level</div>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
+                  <div className="text-sm text-green-800 dark:text-green-400 font-medium">Break Even Price</div>
+                  <div className="text-2xl font-bold text-green-900 dark:text-green-300">${analysis.breakEvenPrice?.toLocaleString() ?? '0'}</div>
+                  <div className="text-xs text-green-700 dark:text-green-500 mt-1">Avg Entry Level</div>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <div className="text-sm text-emerald-800 font-medium">Profit Target (TP)</div>
-                  <div className="text-2xl font-bold text-emerald-900">${analysis.profitTargetPrice?.toLocaleString() ?? '0'}</div>
-                  <div className="text-xs text-emerald-700 mt-1">Avg Entry + TP</div>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
+                  <div className="text-sm text-emerald-800 dark:text-emerald-400 font-medium">Profit Target (TP)</div>
+                  <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">${analysis.profitTargetPrice?.toLocaleString() ?? '0'}</div>
+                  <div className="text-xs text-emerald-700 dark:text-emerald-500 mt-1">Avg Entry + TP</div>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <div className="text-sm text-red-800 font-medium">Estimated Margin Call</div>
-                  <div className="text-2xl font-bold text-red-900">${analysis.marginCallPrice?.toLocaleString() ?? '0'}</div>
-                  <div className="text-xs text-red-700 mt-1">~${analysis.maxSafeDrop} drop from current</div>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
+                  <div className="text-sm text-red-800 dark:text-red-400 font-medium">Estimated Margin Call</div>
+                  <div className="text-2xl font-bold text-red-900 dark:text-red-300">${analysis.marginCallPrice?.toLocaleString() ?? '0'}</div>
+                  <div className="text-xs text-red-700 dark:text-red-500 mt-1">~${analysis.maxSafeDrop} drop from current</div>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <div className="text-sm text-slate-800 font-medium">Lowest Triggered Level</div>
-                  <div className="text-2xl font-bold text-slate-900">${analysis.lowestTriggered.toLocaleString()}</div>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
+                  <div className="text-sm text-slate-800 dark:text-slate-300 font-medium">Lowest Triggered Level</div>
+                  <div className="text-2xl font-bold text-slate-900 dark:text-white">${analysis.lowestTriggered.toLocaleString()}</div>
                 </div>
               </div>
             </div>
 
             {/* Drawdown Scenarios Card */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-lg p-6 border-2 border-red-200">
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/40 dark:to-orange-900/30 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-red-200 dark:border-red-800">
               <div className="flex items-center gap-3 mb-4">
-                <TrendingDown className="w-8 h-8 text-red-700" />
-                <h3 className="text-xl font-bold text-red-900">If Price Drops Further</h3>
+                <TrendingDown className="w-8 h-8 text-red-700 dark:text-red-400" />
+                <h3 className="text-xl font-bold text-red-900 dark:text-red-100">If Price Drops Further</h3>
               </div>
 
               <div className="space-y-3 text-sm">
-                <div className="bg-white/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800">$10 more drop:</span>
-                  <span className="text-lg font-bold text-red-700">{analysis.drop10?.toLocaleString() ?? '0'} USC</span>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
+                  <span className="font-medium text-slate-800 dark:text-slate-300">$10 more drop:</span>
+                  <span className="text-lg font-bold text-red-700 dark:text-red-400">{analysis.drop10?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800">$25 more drop:</span>
-                  <span className="text-lg font-bold text-red-700">{analysis.drop25?.toLocaleString() ?? '0'} USC</span>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
+                  <span className="font-medium text-slate-800 dark:text-slate-300">$25 more drop:</span>
+                  <span className="text-lg font-bold text-red-700 dark:text-red-400">{analysis.drop25?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800">$50 more drop:</span>
-                  <span className="text-lg font-bold text-red-800">{analysis.drop50?.toLocaleString() ?? '0'} USC</span>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
+                  <span className="font-medium text-slate-800 dark:text-slate-300">$50 more drop:</span>
+                  <span className="text-lg font-bold text-red-800 dark:text-red-400">{analysis.drop50?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800">$100 more drop:</span>
-                  <span className="text-lg font-bold text-red-900">{analysis.drop100?.toLocaleString() ?? '0'} USC</span>
+                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
+                  <span className="font-medium text-slate-800 dark:text-slate-300">$100 more drop:</span>
+                  <span className="text-lg font-bold text-red-900 dark:text-red-400">{analysis.drop100?.toLocaleString() ?? '0'} USC</span>
                 </div>
               </div>
             </div>
 
             {/* Key Numbers Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-slate-200">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-3 mb-4">
-                <DollarSign className="w-8 h-8 text-blue-600" />
-                <h3 className="text-xl font-bold text-slate-800">Key Numbers</h3>
+                <DollarSign className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white">Key Numbers</h3>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-700 font-medium">Total Lots Open:</span>
-                  <span className="text-xl font-bold text-slate-900">{analysis.totalLots}</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">Total Lots Open:</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">{analysis.totalLots}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-700 font-medium">Total Ounces:</span>
-                  <span className="text-xl font-bold text-slate-900">{analysis.totalOunces}</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">Total Ounces:</span>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">{analysis.totalOunces}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-700 font-medium">Exposure:</span>
-                  <span className="text-lg font-semibold text-slate-900">{analysis.notionalUSC?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">Exposure:</span>
+                  <span className="text-lg font-semibold text-slate-900 dark:text-white">{analysis.notionalUSC?.toLocaleString() ?? '0'} USC</span>
                 </div>
               </div>
             </div>
 
             {/* Profit Potential Card */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-lg p-6 border-2 border-green-200">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/30 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-green-200 dark:border-green-800">
               <div className="flex items-center gap-3 mb-4">
-                <Target className="w-8 h-8 text-green-700" />
-                <h3 className="text-xl font-bold text-green-900">Profit Potential</h3>
+                <Target className="w-8 h-8 text-green-700 dark:text-green-400" />
+                <h3 className="text-xl font-bold text-green-900 dark:text-green-100">Profit Potential</h3>
               </div>
 
-              <div className="bg-white/70 p-4 rounded-lg">
-                <div className="text-sm text-green-800 font-medium mb-2">If ALL open positions close at Take Profit:</div>
-                <div className="text-4xl font-bold text-green-900">+{analysis.totalPotentialProfit?.toLocaleString() ?? '0'} USC</div>
-                <div className="text-sm text-green-700 mt-2">= ${((analysis.totalPotentialProfit ?? 0) / 100).toFixed(2)} USD</div>
+              <div className="bg-white/70 dark:bg-slate-800/70 p-4 rounded-lg">
+                <div className="text-sm text-green-800 dark:text-green-400 font-medium mb-2">If ALL open positions close at Take Profit:</div>
+                <div className="text-4xl font-bold text-green-900 dark:text-green-300">+{analysis.totalPotentialProfit?.toLocaleString() ?? '0'} USC</div>
+                <div className="text-sm text-green-700 dark:text-green-500 mt-2">= ${((analysis.totalPotentialProfit ?? 0) / 100).toFixed(2)} USD</div>
               </div>
             </div>
 
@@ -743,17 +767,80 @@ export default function App() {
             </div>
 
             {/* Visual Equity Curve */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-slate-200">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingDown className="w-8 h-8 text-blue-600" />
-                <h3 className="text-xl font-bold text-slate-800">Projected Equity Curve</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-slate-200 dark:border-slate-700 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <TrendingDown className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white">Projected Equity Curve</h3>
+                </div>
+                <button
+                  onClick={() => setShowEquityCurveInfo(true)}
+                  className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
+                  title="Learn how to use this chart"
+                >
+                  <Info className="w-5 h-5 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
+                </button>
               </div>
               <EquityChart
                 data={analysis.equityCurveData ?? []}
                 marginCallEquity={(analysis.usedMargin ?? 0) * 0.5}
                 balance={balanceUSC}
               />
-              <p className="text-xs text-slate-500 mt-2 text-center">Simulated equity as price drops from current level.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">Simulated equity as price drops from current level.</p>
+
+              {/* Equity Curve Info Modal */}
+              {showEquityCurveInfo && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowEquityCurveInfo(false)}>
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-transparent dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                    <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                      <h3 className="text-xl font-bold text-slate-800 dark:text-white">Understanding the Equity Curve</h3>
+                      <button onClick={() => setShowEquityCurveInfo(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition">
+                        <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+                      </button>
+                    </div>
+                    <div className="p-6 space-y-5 text-slate-700 dark:text-slate-300">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                          <span className="text-blue-500">📊</span> What is this chart?
+                        </h4>
+                        <p className="text-sm">This curve shows your <strong>projected account equity</strong> as the price drops from its current level. It simulates what happens to your account balance if the market moves against your grid positions.</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                          <span className="text-blue-500">📖</span> How to read it
+                        </h4>
+                        <ul className="text-sm space-y-2">
+                          <li><strong className="text-blue-600 dark:text-blue-400">Blue Line:</strong> Your equity curve - shows how your account equity changes</li>
+                          <li><strong className="text-slate-600 dark:text-slate-400">Dashed Gray Line:</strong> Your starting balance reference</li>
+                          <li><strong className="text-red-600 dark:text-red-400">Dashed Red Line:</strong> Danger zone - margin call territory</li>
+                          <li><strong>X-Axis (→):</strong> Represents price dropping from left to right</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                          <span className="text-blue-500">⚡</span> Why it's useful
+                        </h4>
+                        <p className="text-sm mb-2">The curve <strong>steepens</strong> as price drops because:</p>
+                        <ul className="text-sm space-y-1 list-disc list-inside text-slate-600 dark:text-slate-400">
+                          <li>More grid levels get triggered, adding positions</li>
+                          <li>Losses accumulate faster with more open positions</li>
+                          <li>This visualizes the <em>accelerating risk</em> of grid strategies</li>
+                        </ul>
+                      </div>
+                      <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                        <p className="text-sm text-amber-800 dark:text-amber-200">
+                          <strong>💡 Pro Tip:</strong> If the curve drops sharply, consider reducing your lot size or number of levels to flatten the curve and reduce risk.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 rounded-b-xl">
+                      <button onClick={() => setShowEquityCurveInfo(false)} className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                        Got it!
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
@@ -761,19 +848,19 @@ export default function App() {
 
         {/* Visual Grid Ladder */}
         {analysis && !analysis.noPositions && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 mb-6 border border-transparent dark:border-slate-700">
             <div className="flex items-center gap-3 mb-4">
-              <Activity className="w-6 h-6 text-slate-700" />
-              <h3 className="text-xl font-bold text-slate-800">Grid Levels Visualization</h3>
+              <Activity className="w-6 h-6 text-slate-700 dark:text-slate-400" />
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Grid Levels Visualization</h3>
             </div>
             <GridLadder table={table} />
           </div>
         )}
 
         {/* Detailed Table */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 mb-6 border border-transparent dark:border-slate-700">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-slate-800">Grid Level Details</h3>
+            <h3 className="text-xl font-semibold text-slate-800 dark:text-white">Grid Level Details</h3>
             <button onClick={downloadCSV} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition shadow">
               Download CSV
             </button>
@@ -782,30 +869,30 @@ export default function App() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-slate-200 bg-slate-50">
-                  <th className="p-3 text-left font-semibold">#</th>
-                  <th className="p-3 text-left font-semibold">Status</th>
-                  <th className="p-3 text-left font-semibold">Price Level</th>
-                  <th className="p-3 text-left font-semibold">Lots Here</th>
-                  <th className="p-3 text-left font-semibold">Total Lots</th>
-                  <th className="p-3 text-left font-semibold">Total Oz</th>
-                  <th className="p-3 text-left font-semibold">Profit at TP</th>
+                <tr className="border-b-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">#</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Status</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Price Level</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Lots Here</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Total Lots</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Total Oz</th>
+                  <th className="p-3 text-left font-semibold dark:text-slate-200">Profit at TP</th>
                 </tr>
               </thead>
               <tbody>
                 {table.map((row) => (
-                  <tr key={row.idx} className={`border-b border-slate-100 transition ${row.isTriggered ? 'bg-green-50 hover:bg-green-100' : 'bg-slate-50 hover:bg-slate-100'}`}>
-                    <td className="p-3 font-medium">{row.idx}</td>
+                  <tr key={row.idx} className={`border-b border-slate-100 dark:border-slate-700 transition ${row.isTriggered ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30' : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                    <td className="p-3 font-medium dark:text-slate-200">{row.idx}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${row.isTriggered ? 'bg-green-200 text-green-900' : 'bg-gray-200 text-gray-700'}`}>
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${row.isTriggered ? 'bg-green-200 dark:bg-green-900/50 text-green-900 dark:text-green-300' : 'bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-300'}`}>
                         {row.isTriggered ? '✓ OPEN' : 'Waiting'}
                       </span>
                     </td>
-                    <td className="p-3 font-semibold text-blue-700">${row.levelPrice}</td>
-                    <td className="p-3">{row.lotsAtThisLevel}</td>
-                    <td className="p-3 font-medium">{row.cumulativeLots}</td>
-                    <td className="p-3">{row.totalOunces}</td>
-                    <td className="p-3 text-green-700 font-semibold">+{row.potentialProfitIfAllClosed.toLocaleString()}</td>
+                    <td className="p-3 font-semibold text-blue-700 dark:text-blue-400">${row.levelPrice}</td>
+                    <td className="p-3 dark:text-slate-300">{row.lotsAtThisLevel}</td>
+                    <td className="p-3 font-medium dark:text-slate-200">{row.cumulativeLots}</td>
+                    <td className="p-3 dark:text-slate-300">{row.totalOunces}</td>
+                    <td className="p-3 text-green-700 dark:text-green-400 font-semibold">+{row.potentialProfitIfAllClosed.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -814,9 +901,9 @@ export default function App() {
         </div>
 
         {/* Warning Footer */}
-        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 text-sm">
-          <p className="font-bold text-yellow-900 mb-2">⚠️ IMPORTANT DISCLAIMER:</p>
-          <p className="text-yellow-800">This calculator provides estimates only. Real trading involves spreads, commissions, swaps, and slippage. Grid trading can lead to rapid account loss in volatile markets. Always test with demo accounts first and never risk more than you can afford to lose.</p>
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-xl p-4 text-sm">
+          <p className="font-bold text-yellow-900 dark:text-yellow-200 mb-2">⚠️ IMPORTANT DISCLAIMER:</p>
+          <p className="text-yellow-800 dark:text-yellow-300">This calculator provides estimates only. Real trading involves spreads, commissions, swaps, and slippage. Grid trading can lead to rapid account loss in volatile markets. Always test with demo accounts first and never risk more than you can afford to lose.</p>
         </div>
 
       </div>
