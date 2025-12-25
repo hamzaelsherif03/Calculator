@@ -736,28 +736,36 @@ export default function App() {
             </div>
 
             {/* Drawdown Scenarios Card */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/40 dark:to-orange-900/30 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 border-2 border-red-200 dark:border-red-800">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingDown className="w-8 h-8 text-red-700 dark:text-red-400" />
-                <h3 className="text-xl font-bold text-red-900 dark:text-red-100">If Price Drops Further</h3>
+            {/* Drawdown Scenarios Card */}
+            <div className="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-red-900/40 dark:to-orange-900/20 rounded-2xl shadow-xl dark:shadow-slate-900/50 p-6 border-2 border-rose-100/80 dark:border-rose-800/50 relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl rounded-full pointer-events-none -mr-10 -mt-10"></div>
+
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900/60 dark:to-orange-900/60 rounded-xl text-rose-600 dark:text-rose-400 shadow-sm border border-rose-200/50 dark:border-rose-700/50">
+                  <TrendingDown className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white">If Price Drops Further</h3>
               </div>
 
-              <div className="space-y-3 text-sm">
-                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800 dark:text-slate-300">$10 more drop:</span>
-                  <span className="text-lg font-bold text-red-700 dark:text-red-400">{analysis.drop10?.toLocaleString() ?? '0'} USC</span>
+              <div className="space-y-3 relative z-10">
+                <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
+                  <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$10 more drop</span>
+                  <span className="text-lg font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop10?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800 dark:text-slate-300">$25 more drop:</span>
-                  <span className="text-lg font-bold text-red-700 dark:text-red-400">{analysis.drop25?.toLocaleString() ?? '0'} USC</span>
+
+                <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
+                  <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$25 more drop</span>
+                  <span className="text-lg font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop25?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800 dark:text-slate-300">$50 more drop:</span>
-                  <span className="text-lg font-bold text-red-800 dark:text-red-400">{analysis.drop50?.toLocaleString() ?? '0'} USC</span>
+
+                <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
+                  <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$50 more drop</span>
+                  <span className="text-lg font-bold text-rose-800 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop50?.toLocaleString() ?? '0'} USC</span>
                 </div>
-                <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-medium text-slate-800 dark:text-slate-300">$100 more drop:</span>
-                  <span className="text-lg font-bold text-red-900 dark:text-red-400">{analysis.drop100?.toLocaleString() ?? '0'} USC</span>
+
+                <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
+                  <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$100 more drop</span>
+                  <span className="text-lg font-bold text-rose-900 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop100?.toLocaleString() ?? '0'} USC</span>
                 </div>
               </div>
             </div>
