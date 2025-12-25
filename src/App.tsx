@@ -709,23 +709,23 @@ export default function App() {
                   <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-orange-200 dark:border-orange-800/50">
                     <div className="text-[10px] text-orange-800 dark:text-orange-400 font-bold uppercase tracking-wider mb-1">25% DD</div>
                     <div className="text-lg font-bold text-orange-900 dark:text-orange-300">
-                      ${analysis.dd25Price > 0 ? analysis.dd25Price.toLocaleString() : '---'}
+                      ${(analysis.dd25Price ?? 0) > 0 ? analysis.dd25Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-orange-700 dark:text-orange-500 font-medium mt-1">-{analysis.dd25Amount.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-orange-700 dark:text-orange-500 font-medium mt-1">-{analysis.dd25Amount?.toLocaleString()} USC</div>
                   </div>
                   <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-red-200 dark:border-red-800/50">
                     <div className="text-[10px] text-red-800 dark:text-red-400 font-bold uppercase tracking-wider mb-1">50% DD</div>
                     <div className="text-lg font-bold text-red-900 dark:text-red-300">
-                      ${analysis.dd50Price > 0 ? analysis.dd50Price.toLocaleString() : '---'}
+                      ${(analysis.dd50Price ?? 0) > 0 ? analysis.dd50Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-red-700 dark:text-red-500 font-medium mt-1">-{analysis.dd50Amount.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-red-700 dark:text-red-500 font-medium mt-1">-{analysis.dd50Amount?.toLocaleString()} USC</div>
                   </div>
                   <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-purple-200 dark:border-purple-800/50">
                     <div className="text-[10px] text-purple-800 dark:text-purple-400 font-bold uppercase tracking-wider mb-1">75% DD</div>
                     <div className="text-lg font-bold text-purple-900 dark:text-purple-300">
-                      ${analysis.dd75Price > 0 ? analysis.dd75Price.toLocaleString() : '---'}
+                      ${(analysis.dd75Price ?? 0) > 0 ? analysis.dd75Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-purple-700 dark:text-purple-500 font-medium mt-1">-{analysis.dd75Amount.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-purple-700 dark:text-purple-500 font-medium mt-1">-{analysis.dd75Amount?.toLocaleString()} USC</div>
                   </div>
                 </div>
                 <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
