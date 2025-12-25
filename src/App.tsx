@@ -207,20 +207,48 @@ export default function App() {
     // Margin call estimation - Iterative approach (Binary Search)
     const stopOutLevel = 0.50;
 
-    const findMarginCallPrice = () => {
+    const findPriceForEquity = (targetEquity: number) => {
       let low = 0;
       let high = currentPrice;
-      let marginCallPrice = 0;
+      let targetPrice = 0;
 
-      // Binary search for the price where Equity <= UsedMargin * StopOutLevel
-      for (let i = 0; i < 20; i++) { // 20 iterations is enough for 2 decimal precision
+      for (let i = 0; i < 20; i++) {
         const mid = (low + high) / 2;
-
-        // Calculate state at price 'mid'
         const triggeredAtMid = table.filter(r => mid <= r.levelPrice);
 
         if (triggeredAtMid.length === 0) {
-          // No positions, safe
+          high = mid;
+          continue;
+        }
+
+        const lastAtMid = triggeredAtMid[triggeredAtMid.length - 1];
+        const totalLotsAtMid = lastAtMid.cumulativeLots;
+        const totalOuncesAtMid = lastAtMid.totalOunces;
+        const avgEntryAtMid = triggeredAtMid.reduce((s, r) => s + r.levelPrice * r.lotsAtThisLevel, 0) / totalLotsAtMid;
+
+        const floatingPLAtMid = (mid - avgEntryAtMid) * totalOuncesAtMid * 100;
+        const equityAtMid = balanceUSC + floatingPLAtMid;
+
+        if (equityAtMid <= targetEquity) {
+          targetPrice = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+      return +targetPrice.toFixed(2);
+    };
+
+    const marginCallPrice = (() => {
+      let low = 0;
+      let high = currentPrice;
+      let resultPrice = 0;
+
+      for (let i = 0; i < 20; i++) {
+        const mid = (low + high) / 2;
+        const triggeredAtMid = table.filter(r => mid <= r.levelPrice);
+
+        if (triggeredAtMid.length === 0) {
           high = mid;
           continue;
         }
@@ -237,18 +265,22 @@ export default function App() {
         const usedMarginAtMid = (notionalUSDAtMid / leverage) * 100;
 
         if (equityAtMid <= usedMarginAtMid * stopOutLevel) {
-          // Margin call happens here or higher (earlier)
-          marginCallPrice = mid;
+          resultPrice = mid;
           low = mid;
         } else {
-          // Safe here, margin call is lower
           high = mid;
         }
       }
-      return +marginCallPrice.toFixed(2);
-    };
+      return +resultPrice.toFixed(2);
+    })();
 
-    const marginCallPrice = findMarginCallPrice();
+    const dd25Price = findPriceForEquity(balanceUSC * 0.75);
+    const dd50Price = findPriceForEquity(balanceUSC * 0.50);
+    const dd75Price = findPriceForEquity(balanceUSC * 0.25);
+
+    const dd25Amount = +(balanceUSC * 0.25).toFixed(2);
+    const dd50Amount = +(balanceUSC * 0.50).toFixed(2);
+    const dd75Amount = +(balanceUSC * 0.75).toFixed(2);
     const maxSafeDrop = +(currentPrice - marginCallPrice).toFixed(2);
     const currentEquity = +(balanceUSC + currentFloatingPL).toFixed(2);
 
@@ -283,6 +315,12 @@ export default function App() {
       drop50,
       drop100,
       marginCallPrice,
+      dd25Price,
+      dd50Price,
+      dd75Price,
+      dd25Amount,
+      dd50Amount,
+      dd75Amount,
       maxSafeDrop,
       riskLevel,
       riskColor,
@@ -666,6 +704,29 @@ export default function App() {
                   <div className="text-sm text-red-800 dark:text-red-400 font-medium">Estimated Margin Call</div>
                   <div className="text-2xl font-bold text-red-900 dark:text-red-300">${analysis.marginCallPrice?.toLocaleString() ?? '0'}</div>
                   <div className="text-xs text-red-700 dark:text-red-500 mt-1">~${analysis.maxSafeDrop} drop from current</div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-orange-200 dark:border-orange-800/50">
+                    <div className="text-[10px] text-orange-800 dark:text-orange-400 font-bold uppercase tracking-wider mb-1">25% DD</div>
+                    <div className="text-lg font-bold text-orange-900 dark:text-orange-300">
+                      ${analysis.dd25Price > 0 ? analysis.dd25Price.toLocaleString() : '---'}
+                    </div>
+                    <div className="text-[10px] text-orange-700 dark:text-orange-500 font-medium mt-1">-{analysis.dd25Amount.toLocaleString()} USC</div>
+                  </div>
+                  <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-red-200 dark:border-red-800/50">
+                    <div className="text-[10px] text-red-800 dark:text-red-400 font-bold uppercase tracking-wider mb-1">50% DD</div>
+                    <div className="text-lg font-bold text-red-900 dark:text-red-300">
+                      ${analysis.dd50Price > 0 ? analysis.dd50Price.toLocaleString() : '---'}
+                    </div>
+                    <div className="text-[10px] text-red-700 dark:text-red-500 font-medium mt-1">-{analysis.dd50Amount.toLocaleString()} USC</div>
+                  </div>
+                  <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-purple-200 dark:border-purple-800/50">
+                    <div className="text-[10px] text-purple-800 dark:text-purple-400 font-bold uppercase tracking-wider mb-1">75% DD</div>
+                    <div className="text-lg font-bold text-purple-900 dark:text-purple-300">
+                      ${analysis.dd75Price > 0 ? analysis.dd75Price.toLocaleString() : '---'}
+                    </div>
+                    <div className="text-[10px] text-purple-700 dark:text-purple-500 font-medium mt-1">-{analysis.dd75Amount.toLocaleString()} USC</div>
+                  </div>
                 </div>
                 <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
                   <div className="text-sm text-slate-800 dark:text-slate-300 font-medium">Lowest Triggered Level</div>
