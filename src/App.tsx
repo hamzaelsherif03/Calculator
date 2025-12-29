@@ -1,5 +1,7 @@
-import { useMemo, useState, useEffect } from 'react';
-import { AlertTriangle, TrendingDown, DollarSign, Target, Activity, Info, X, Moon, Sun } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { AlertTriangle, TrendingDown, DollarSign, Target, Activity, Info, X, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+
+import { useAudioAlerts } from './hooks/useAudioAlerts';
 
 // Cookie utility functions
 const setCookie = (name: string, value: string, days: number = 365) => {
@@ -53,6 +55,9 @@ export default function App() {
     const saved = getCookie('leverage');
     return saved ? parseFloat(saved) : 2000;
   });
+
+  const [isMuted, setIsMuted] = useState(() => getCookie('isMuted') === 'true');
+
   const [contractSize] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [showEquityCurveInfo, setShowEquityCurveInfo] = useState(false);
@@ -60,6 +65,10 @@ export default function App() {
     const saved = getCookie('darkMode');
     return saved === 'true';
   });
+
+  // Hooks
+  const { playSound } = useAudioAlerts();
+
 
   // Apply dark mode class to document
   useEffect(() => {
@@ -103,6 +112,12 @@ export default function App() {
   useEffect(() => {
     setCookie('leverage', leverage.toString());
   }, [leverage]);
+
+
+
+  useEffect(() => {
+    setCookie('isMuted', isMuted.toString());
+  }, [isMuted]);
 
   const precision = 2;
 
@@ -358,6 +373,43 @@ export default function App() {
     };
   }, [table, balanceUSC, tp, contractSize, currentPrice, levels, leverage]);
 
+  // Audio Alerts Logic
+  const prevAnalysisRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (isMuted || !analysis) return;
+
+    // Check for state changes to trigger sounds
+    const prev = prevAnalysisRef.current;
+
+    // 1. Profit Alert (Cash Sound)
+    // Trigger if P/L becomes positive (crossed from negative/zero to positive)
+    if (prev && (prev.currentFloatingPL ?? 0) <= 0 && (analysis.currentFloatingPL ?? 0) > 0 && analysis.numTriggered > 0) {
+      playSound('cash');
+    }
+
+    // 2. Drawdown Milestone Alerts (Gentle Alert)
+    // 15% Drawdown
+    const dd15Amount = balanceUSC * 0.15;
+    if (prev && (prev.currentFloatingPL ?? 0) > -dd15Amount && (analysis.currentFloatingPL ?? 0) <= -dd15Amount) {
+      playSound('alert');
+    }
+
+    // 25% Drawdown (Warning)
+    const dd25Amount = balanceUSC * 0.25;
+    if (prev && (prev.currentFloatingPL ?? 0) > -dd25Amount && (analysis.currentFloatingPL ?? 0) <= -dd25Amount) {
+      playSound('warning');
+    }
+
+    // 50% Drawdown (Warning - Critical)
+    const dd50Amount = balanceUSC * 0.50;
+    if (prev && (prev.currentFloatingPL ?? 0) > -dd50Amount && (analysis.currentFloatingPL ?? 0) <= -dd50Amount) {
+      playSound('warning');
+    }
+
+    prevAnalysisRef.current = analysis;
+  }, [analysis, isMuted, balanceUSC, playSound]);
+
   function downloadCSV() {
     const rows = [
       ['Level #', 'Level Price', 'Status', 'Lots at Level', 'Cumulative Lots', 'Total Ounces', 'Potential Profit (USC)'],
@@ -508,23 +560,37 @@ export default function App() {
             <h1 className="text-3xl font-bold mb-2 text-slate-800 dark:text-white">XAU/USD Grid Risk Calculator</h1>
             <p className="text-slate-600 dark:text-slate-400">Enter your grid start price and current price to see real-time position status and risk analysis.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {darkMode ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
-            </button>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
-            >
-              <Info className="w-5 h-5" />
-              How it works
-            </button>
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-2">
+              {/* Audio Toggle */}
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className={`p-2 rounded-lg transition-colors ${isMuted ? 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'}`}
+                title={isMuted ? "Unmute Alerts" : "Mute Alerts"}
+              >
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
+
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {darkMode ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
+              </button>
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
+              >
+                <Info className="w-5 h-5" />
+                How it works
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Control Bar - New Feature */}
+
 
         {/* Hero Section - Price & Position Status */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -584,7 +650,13 @@ export default function App() {
                 </label>
                 <label className="space-y-1">
                   <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Current Price</div>
-                  <input type="number" value={currentPrice} onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)} className="w-full p-2 text-sm border-2 border-blue-200 dark:border-blue-800 rounded-lg focus:border-blue-500 focus:outline-none font-semibold bg-blue-50/50 dark:bg-blue-900/30 dark:text-white" />
+                  <input
+                    type="number"
+                    value={currentPrice}
+                    onChange={e => setCurrentPrice(parseFloat(e.target.value) || 0)}
+                    disabled={false}
+                    className="w-full p-2 text-sm border-2 rounded-lg focus:outline-none font-semibold transition-colors border-blue-200 dark:border-blue-800 focus:border-blue-500 bg-blue-50/50 dark:bg-blue-900/30 dark:text-white"
+                  />
                 </label>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -711,21 +783,21 @@ export default function App() {
                     <div className="text-lg font-bold text-orange-900 dark:text-orange-300">
                       ${(analysis.dd25Price ?? 0) > 0 ? analysis.dd25Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-orange-700 dark:text-orange-500 font-medium mt-1">-{analysis.dd25Amount?.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-orange-700 dark:text-orange-500 font-medium mt-1">-{analysis.dd25Amount?.toLocaleString()} USC (-{((analysis.dd25Amount ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</div>
                   </div>
                   <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-red-200 dark:border-red-800/50">
                     <div className="text-[10px] text-red-800 dark:text-red-400 font-bold uppercase tracking-wider mb-1">50% DD</div>
                     <div className="text-lg font-bold text-red-900 dark:text-red-300">
                       ${(analysis.dd50Price ?? 0) > 0 ? analysis.dd50Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-red-700 dark:text-red-500 font-medium mt-1">-{analysis.dd50Amount?.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-red-700 dark:text-red-500 font-medium mt-1">-{analysis.dd50Amount?.toLocaleString()} USC (-{((analysis.dd50Amount ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</div>
                   </div>
                   <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg border border-purple-200 dark:border-purple-800/50">
                     <div className="text-[10px] text-purple-800 dark:text-purple-400 font-bold uppercase tracking-wider mb-1">75% DD</div>
                     <div className="text-lg font-bold text-purple-900 dark:text-purple-300">
                       ${(analysis.dd75Price ?? 0) > 0 ? analysis.dd75Price?.toLocaleString() : '---'}
                     </div>
-                    <div className="text-[10px] text-purple-700 dark:text-purple-500 font-medium mt-1">-{analysis.dd75Amount?.toLocaleString()} USC</div>
+                    <div className="text-[10px] text-purple-700 dark:text-purple-500 font-medium mt-1">-{analysis.dd75Amount?.toLocaleString()} USC (-{((analysis.dd75Amount ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</div>
                   </div>
                 </div>
                 <div className="bg-white/70 dark:bg-slate-800/70 p-3 rounded-lg">
@@ -750,22 +822,22 @@ export default function App() {
               <div className="space-y-3 relative z-10">
                 <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
                   <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$10 more drop</span>
-                  <span className="text-lg font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop10?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop10?.toLocaleString() ?? '0'} USC ({((analysis.drop10 ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
 
                 <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
                   <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$25 more drop</span>
-                  <span className="text-lg font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop25?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop25?.toLocaleString() ?? '0'} USC ({((analysis.drop25 ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
 
                 <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
                   <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$50 more drop</span>
-                  <span className="text-lg font-bold text-rose-800 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop50?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-bold text-rose-800 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop50?.toLocaleString() ?? '0'} USC ({((analysis.drop50 ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
 
                 <div className="group/item flex justify-between items-center p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-xl border border-rose-100/50 dark:border-rose-900/30 hover:shadow-md transition-all duration-300 hover:bg-white dark:hover:bg-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
                   <span className="font-medium text-slate-600 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-slate-200 transition-colors">$100 more drop</span>
-                  <span className="text-lg font-bold text-rose-900 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop100?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-bold text-rose-900 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-3 py-1 rounded-lg border border-rose-100 dark:border-rose-800/50">{analysis.drop100?.toLocaleString() ?? '0'} USC ({((analysis.drop100 ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
               </div>
             </div>
@@ -788,7 +860,7 @@ export default function App() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-700 dark:text-slate-300 font-medium">Exposure:</span>
-                  <span className="text-lg font-semibold text-slate-900 dark:text-white">{analysis.notionalUSC?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-semibold text-slate-900 dark:text-white">{analysis.notionalUSC?.toLocaleString() ?? '0'} USC ({((analysis.notionalUSC ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
               </div>
             </div>
@@ -824,12 +896,12 @@ export default function App() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Used Margin:</span>
-                  <span className="text-lg font-semibold">{analysis.usedMargin?.toLocaleString() ?? '0'} USC</span>
+                  <span className="text-lg font-semibold">{analysis.usedMargin?.toLocaleString() ?? '0'} USC ({((analysis.usedMargin ?? 0) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Free Margin:</span>
                   <span className="text-lg font-semibold">
-                    {Math.max(0, (analysis.currentEquity ?? 0) - (analysis.usedMargin ?? 0)).toLocaleString()} USC
+                    {Math.max(0, (analysis.currentEquity ?? 0) - (analysis.usedMargin ?? 0)).toLocaleString()} USC ({((Math.max(0, (analysis.currentEquity ?? 0) - (analysis.usedMargin ?? 0))) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})
                   </span>
                 </div>
               </div>
